@@ -1,6 +1,6 @@
-# anti-regression
+# semantic-compactor
 
-**Institutional memory for AI coding agents — so no problem→solution outcome is ever lost to
+**Lossless compaction of session knowledge for AI coding agents — so no problem→solution outcome is ever lost to
 context compaction, session resets, or agent handoffs.**
 
 Agentic development is development where the developer has amnesia. Context windows compact,
@@ -15,7 +15,7 @@ misdiagnoses and validated against real compaction runs.
 ## What's in the box
 
 ```
-anti-regression/
+semantic-compactor/
 ├── SKILL.md                            # the skill: triage protocol + capture architecture
 ├── references/
 │   ├── templates.md                    # SYMPTOMS.md / DECISIONS.md templates + commit trailer convention
@@ -61,14 +61,14 @@ artifact that lies is as dangerous as a lost one.
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -r anti-regression ~/.claude/skills/
+cp -r semantic-compactor ~/.claude/skills/
 ```
 
 Per-project subagents:
 
 ```bash
 mkdir -p .claude/agents
-cp anti-regression/agents/*.md .claude/agents/
+cp semantic-compactor/agents/*.md .claude/agents/
 ```
 
 Other agent frameworks: `SKILL.md` is plain markdown with YAML frontmatter; adapt the

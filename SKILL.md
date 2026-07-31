@@ -1,5 +1,5 @@
 ---
-name: anti-regression
+name: semantic-compactor
 description: >-
   Institutional-memory discipline that guarantees no problem→solution outcome is ever lost
   across sessions, /compact operations, or agent restarts. Use this skill whenever: (1) a bug,
@@ -12,7 +12,7 @@ description: >-
   even if the user doesn't ask — Resolve → Record is atomic.
 ---
 
-# Anti-Regression: Lossless Institutional Memory
+# Semantic Compactor: Lossless Institutional Memory
 
 The purpose of this skill is to make the normal development loop —
 **propose → implement → debug → test → refine → repeat** —
