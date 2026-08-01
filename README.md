@@ -89,6 +89,14 @@ Throwaway prototypes and short-lived projects. The architecture is an investment
 recurrence across context loss; if nothing lives long enough to recur, keep only the
 `Symptom:` trailer (it's free) and skip the rest.
 
+## Why "compaction" and not "compression"
+
+Compression operates on a representation: its domain is an encoding (bits, tokens, embedding dimensions) and its invariant is fidelity — the compressed form reconstructs the original, exactly or approximately. Compaction operates on a store: its domain is an accumulated history, and its invariant is queryability — after compaction, the store must still answer every query it is obligated to answer. Log compaction in Kafka or an LSM database is the ancestor here: the guarantee is not "the log is smaller" but "the latest value per key survives."
+
+Compaction therefore presupposes three things compression does not: a history, a key structure, and a retention policy. This methodology supplies all three for agent sessions. The history is the conversation. The keys are what a future investigator will query by — symptoms, decisions, oddities. The retention policy is: keep the irreversible, discard the superseded and the derivable. The cold-start audit is the queryability invariant made executable — it does not check whether the session can be reconstructed (it cannot and should not be); it checks whether the store still answers its obligated queries.
+
+This is also why representation-level work (token pruning, information bottlenecks, compressed embeddings — often called semantic compression) is related but cannot solve this problem: no amount of compression inside the model changes what the store retains or how it is keyed. A solution filed under its fix rather than its symptom is a keying failure, and keying does not exist below the store level.
+
 ## License
 
 MIT
