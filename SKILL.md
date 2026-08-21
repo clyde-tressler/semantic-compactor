@@ -106,7 +106,9 @@ enforced.
 **Before any compaction or handoff**, run the full pre-compaction pass in
 `references/compaction-checklist.md` — sweep, place, tracked-home check, question index,
 stale-claim removal, auto-injected-artifact reconciliation, cold read, all-PASS acceptance
-bar.
+bar. **After the compaction**, the counterpart skill `rehydrate` restores state the safe
+way: it re-derives the working state from the tracked files and live systems, verifying
+every claim before anything acts on it, rather than trusting the injected summary.
 
 `SYMPTOMS.md` is the store most likely to be missing from a repo — debugging knowledge is
 otherwise homeless and scatters into commits, comments, and transcripts, recoverable only by

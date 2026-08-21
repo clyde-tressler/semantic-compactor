@@ -62,7 +62,12 @@ artifact that lies is as dangerous as a lost one.
 ```bash
 mkdir -p ~/.claude/skills
 cp -r semantic-compactor ~/.claude/skills/
+cp -r semantic-compactor/rehydrate ~/.claude/skills/
 ```
+
+The second copy installs `rehydrate` as its own skill — the post-compaction counterpart
+that re-derives working state from the tracked files and live systems, verifying every
+claim before acting on it, instead of trusting the injected summary.
 
 Per-project subagents:
 
