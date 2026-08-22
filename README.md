@@ -21,6 +21,8 @@ semantic-compactor/
 │   ├── templates.md                    # SYMPTOMS.md / DECISIONS.md templates + commit trailer convention
 │   ├── verifier-pattern.md             # automated detectors for human-only failure classes
 │   └── compaction-checklist.md         # pre-compaction pass with all-PASS acceptance bar
+├── rehydrate/
+│   └── SKILL.md                        # companion skill: verified state restore after compaction
 └── agents/
     ├── regression-triage.md            # subagent: symptom-first triage BEFORE theorizing
     └── cold-start-auditor.md           # subagent: verifies the record is actually lossless
@@ -55,6 +57,17 @@ conversation that no longer exists. The audit simulates a *fresh clone* (gitigno
 treated as absent) and flags stale claims that `HEAD` contradicts — because a surviving
 artifact that lies is as dangerous as a lost one.
 
+**Rehydration** — the compaction pass has a counterpart on the other side of the context
+loss, packaged as its own skill (`rehydrate/`). After a compaction, or at the start of any
+session resuming prior work, it re-derives the working state from the tracked files and
+live systems instead of trusting any summary — the harness-injected compaction summary is
+a convenience copy, not a record. The governing rule is the compactor's own: a surviving
+note states intent, not fact. Every claim in the dashboard's state block is classified
+(git claims, external-state claims, position claims, queue claims) and verified against
+its actual source of truth — `git log`, the live system, the ledger — then reported as
+VERIFIED, CONTRADICTED, or UNVERIFIED. Contradictions are surfaced before anything acts
+on them; work resumes only from a verified resume point.
+
 ## Install
 
 **Claude Code** — as a skill:
@@ -65,9 +78,8 @@ cp -r semantic-compactor ~/.claude/skills/
 cp -r semantic-compactor/rehydrate ~/.claude/skills/
 ```
 
-The second copy installs `rehydrate` as its own skill — the post-compaction counterpart
-that re-derives working state from the tracked files and live systems, verifying every
-claim before acting on it, instead of trusting the injected summary.
+The second copy installs the `rehydrate` companion skill (see **Rehydration** above) as
+its own top-level skill so the harness can trigger it independently.
 
 Per-project subagents:
 
