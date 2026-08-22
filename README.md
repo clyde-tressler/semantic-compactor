@@ -3,6 +3,10 @@
 **Lossless compaction of session knowledge for AI coding agents — so no problem→solution outcome is ever lost to
 context compaction, session resets, or agent handoffs.**
 
+Ships as a Claude Code skill, with per-project subagents and a `rehydrate` companion skill
+for verified restore on the other side of a context loss. The method itself is
+harness-agnostic: any agent framework that can read a markdown playbook can adopt it.
+
 Agentic development is development where the developer has amnesia. Context windows compact,
 sessions end, and the hard-won knowledge from a debugging session — the root cause, the
 discriminating experiments, everything that was ruled out — evaporates. Human teams get
