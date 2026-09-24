@@ -35,18 +35,26 @@ of knowledge loss, where an artifact outlives the session and actively misleads.
    a stale note from a live one; a wrong claim misleads worse than a missing one. Sweep the
    docs you touched for statements that `HEAD` now contradicts.
 
-6. **Sweep the auto-injected artifacts — not just the tracked docs.** Anything the harness
+6. **Reconcile the dashboard.** Whatever backend the repo's CLAUDE.md declares (see
+   `references/dashboard-backends.md`), bring it to truth against `HEAD`: close every
+   item whose work has landed, queue work that is genuinely pending but unrecorded, and
+   correct any state claim `HEAD` now contradicts. An open item for finished work is the
+   dashboard's version of a stale claim. For an external backend (e.g. Jira), also
+   confirm the dashboard is not the *only* home of any irreversible fact — move such
+   facts to the tracked ledger and leave a pointer.
+
+7. **Sweep the auto-injected artifacts — not just the tracked docs.** Anything the harness
    re-surfaces into fresh context after compaction (plan files, loaded backlogs, memory rules)
    must be reconciled against `HEAD`: mark completed items DONE *in the artifact itself*.
    Resolve→Record applies to plans, not only to ledgers. A surviving plan that describes
    finished work as pending will cause a future agent to re-do it.
 
-7. **Cold-read verification** (translation validation). Dispatch a fresh, zero-memory agent
+8. **Cold-read verification** (translation validation). Dispatch a fresh, zero-memory agent
    per `agents/cold-start-auditor.md`. **Tell it which paths are gitignored and have it treat
    them as absent** — a cold read on your working copy otherwise false-PASSes on files a
    fresh clone won't have. It answers every question from the repo alone: PASS / WEAK / FAIL.
 
-8. **Acceptance bar:** proceed only when the cold read is **all-PASS** *and* every
+9. **Acceptance bar:** proceed only when the cold read is **all-PASS** *and* every
    IRREVERSIBLE fact has a **tracked** home. WEAK counts as a gap. Fix, re-run, then commit
    and push the capture artifacts, then compact.
 

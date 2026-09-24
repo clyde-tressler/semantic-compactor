@@ -84,10 +84,34 @@ Important knowledge should live at multiple levels simultaneously (guard + comme
 | `DECISIONS.md` | append-only, dated | why a choice was made, **including rejected alternatives** |
 | `SYMPTOMS.md` | append-only, keyed by *observable* | symptom → known causes → discriminator → fix + commit ref → **what was ruled out** |
 | Executable guards | test suite / scripts | every fix that *can* be asserted, *is* |
-| Dashboard (`next_steps.md` or similar) | mutable, small | current state, explicitly derived, regularly reconciled |
+| Dashboard (pluggable backend) | mutable, small | current state + queued work, explicitly derived, regularly reconciled |
 
 **Critical rule: never mix append-only history with mutable state in one file.**
 Dated facts never become false; state rots. Ledger ≠ dashboard.
+
+### The dashboard is a contract, not a file
+
+The dashboard is defined by four operations — **read** current state, **queue** a work
+item, **update** an in-flight item when its state changes hands, **close** an item the
+moment its work lands — implemented by a per-repo *backend*. Each repo declares its
+backend with one line in CLAUDE.md:
+
+```
+Dashboard: file next_steps.md   # the default when undeclared
+Dashboard: jira PROJ            # a Jira project, via the Atlassian connector
+```
+
+Backend procedures (the file discipline; the Jira issue mapping, connector tool names,
+and queries) live in `references/dashboard-backends.md` — read it when operating a
+dashboard. If no declaration exists, use the `file` backend and ask once whether another
+should be adopted; record the answer in CLAUDE.md.
+
+Whatever the backend, two rules hold. **Resolve → Record applies to the dashboard too**:
+a completed item left open is a stale note that will cause a future agent to re-do the
+work. And the **tracked-home rule stands**: the dashboard holds only *derivable, mutable
+state* — irreversible facts (root causes, decisions, ruled-out branches) discovered while
+working an item go in the tracked ledgers (`DECISIONS.md` / `SYMPTOMS.md`); a dashboard
+item may *point* at the ledger entry, but must never be the fact's only home.
 
 **Tracked-home rule:** a fact whose *only* home is a gitignored file (`CLAUDE.md`,
 `.claude/*`, local scripts, device images) is not durable — it vanishes on a fresh clone.
@@ -105,8 +129,8 @@ enforced.
 
 **Before any compaction or handoff**, run the full pre-compaction pass in
 `references/compaction-checklist.md` — sweep, place, tracked-home check, question index,
-stale-claim removal, auto-injected-artifact reconciliation, cold read, all-PASS acceptance
-bar. **After the compaction**, the counterpart skill `rehydrate` restores state the safe
+stale-claim removal, dashboard reconciliation, auto-injected-artifact reconciliation,
+cold read, all-PASS acceptance bar. **After the compaction**, the counterpart skill `rehydrate` restores state the safe
 way: it re-derives the working state from the tracked files and live systems, verifying
 every claim before anything acts on it, rather than trusting the injected summary.
 
@@ -166,11 +190,15 @@ of losslessness. Full procedure and question-generation guidance: `agents/cold-s
 
 1. Create `DECISIONS.md` and `SYMPTOMS.md` from `references/templates.md`; seed `SYMPTOMS.md`
    with every currently-known symptom.
-2. Audit existing docs: move any derivable state out of append-only files; move any history
+2. Choose a dashboard backend and declare it in CLAUDE.md (`Dashboard: file next_steps.md`
+   or `Dashboard: jira <KEY>` — see `references/dashboard-backends.md`). If mutable state
+   currently lives somewhere else, migrate its open items into the declared backend and
+   retire the old home — one dashboard, not two.
+3. Audit existing docs: move any derivable state out of append-only files; move any history
    out of mutable dashboards.
-3. For each known past fix, check whether an executable guard exists; write the missing ones —
+4. For each known past fix, check whether an executable guard exists; write the missing ones —
    with special attention to output the tests can't see but a human can (rendered screens,
    audio, hardware behavior). If the only detector for a failure class is a human, build a
    verifier for it per `references/verifier-pattern.md`, and prove it in both directions.
-4. Adopt the `Symptom:` commit trailer going forward.
-5. Run one cold-start test to baseline the record's losslessness.
+5. Adopt the `Symptom:` commit trailer going forward.
+6. Run one cold-start test to baseline the record's losslessness.

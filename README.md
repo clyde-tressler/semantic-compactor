@@ -48,8 +48,9 @@ discriminating experiment before exploring within a layer.
 - *The durability ladder.* Executable guard > comment at the danger point > indexed doc >
   prose log > conversation. Push everything as high as it goes.
 - *Four stores, one job each.* `DECISIONS.md` (append-only why), `SYMPTOMS.md` (append-only,
-  keyed by observable), executable guards, and a small mutable dashboard. Never mix ledger
-  and dashboard.
+  keyed by observable), executable guards, and a small mutable dashboard with a pluggable
+  backend (a tracked `next_steps.md` by default, or a Jira project — see **Dashboard
+  backends** below). Never mix ledger and dashboard.
 - *Three habits.* Resolve→Record atomically; a `Symptom:` trailer on every fix commit (makes
   git a self-maintaining symptom index); productize-or-it-regresses (if a script could have
   detected the symptom, write it before closing the session).
@@ -66,7 +67,7 @@ loss, packaged as its own skill (`rehydrate/`). After a compaction, or at the st
 session resuming prior work, it re-derives the working state from the tracked files and
 live systems instead of trusting any summary — the harness-injected compaction summary is
 a convenience copy, not a record. The governing rule is the compactor's own: a surviving
-note states intent, not fact. Every claim in the dashboard's state block is classified
+note states intent, not fact. Every claim in the dashboard's state is classified
 (git claims, external-state claims, position claims, queue claims) and verified against
 its actual source of truth — `git log`, the live system, the ledger — then reported as
 VERIFIED, CONTRADICTED, or UNVERIFIED. Contradictions are surfaced before anything acts
@@ -95,14 +96,34 @@ cp semantic-compactor/agents/*.md .claude/agents/
 Other agent frameworks: `SKILL.md` is plain markdown with YAML frontmatter; adapt the
 `description` triggering to your harness's convention.
 
+## Dashboard backends
+
+The mutable dashboard store is pluggable, and the choice is **per-repo**, not
+per-install — one line in the repo's CLAUDE.md:
+
+```
+Dashboard: file next_steps.md   # default when undeclared — portable, zero dependencies
+Dashboard: jira PROJ            # a Jira project, via the claude.ai Atlassian connector
+```
+
+The core skill and `rehydrate` speak only the dashboard *contract* (read / queue /
+update / close); the concrete procedures per backend — including the Jira issue mapping,
+connector tool names, queries, and the board's pre-compaction reconciliation — live in
+`references/dashboard-backends.md`. An external backend such as Jira may hold only
+mutable, derivable state; irreversible facts stay in the tracked ledgers. Any store
+satisfying the same contract (GitHub Issues, Linear) can be added as a new section in
+that file.
+
 ## Bootstrap a repo
 
 1. Create `DECISIONS.md` and `SYMPTOMS.md` from `references/templates.md`; seed `SYMPTOMS.md`
    with every currently-known symptom.
-2. Adopt the `Symptom:` commit trailer.
-3. For failure classes only a human can currently detect (rendered output, audio, hardware),
+2. Declare a dashboard backend in CLAUDE.md (see **Dashboard backends**); migrate any
+   existing mutable-state file into it — one dashboard, not two.
+3. Adopt the `Symptom:` commit trailer.
+4. For failure classes only a human can currently detect (rendered output, audio, hardware),
    build a verifier per `references/verifier-pattern.md` — and prove it in both directions.
-4. Run one cold-start audit to baseline how lossy your record already is.
+5. Run one cold-start audit to baseline how lossy your record already is.
 
 ## When NOT to use this
 

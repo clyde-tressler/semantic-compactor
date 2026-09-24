@@ -5,8 +5,8 @@ description: Post-compaction state restore — re-derive the true working state 
 
 # Rehydrate: verified restore after compaction
 
-The semantic-compactor's pre-compaction pass pushes the session's state into tracked files
-(the dashboard, the ledgers, git). This skill is the other half: after a compaction (or at
+The semantic-compactor's pre-compaction pass pushes the session's state into durable
+stores (the dashboard, the tracked ledgers, git). This skill is the other half: after a compaction (or at
 the start of any session resuming prior work), **re-derive the state from those sources of
 truth instead of trusting any summary** — including the harness-injected compaction summary,
 which is a convenience copy, not a record.
@@ -16,24 +16,27 @@ Every claim gets verified against its source of truth before anything acts on it
 
 ## Procedure
 
-### 1. Locate the state block
+### 1. Locate the state
 
-Read the project dashboard (`next_steps.md` or the project's equivalent mutable state file —
-CLAUDE.md usually names it). The resume point is the most recent dated "CURRENT STATE"
-block at the top. If no dashboard exists or the top block predates the last few commits,
-say so — that itself is a finding (the compactor's pass was skipped or incomplete).
+Read the repo's dashboard declaration in CLAUDE.md (`Dashboard: jira <KEY>` or
+`Dashboard: file <path>`; undeclared means `file next_steps.md`) and read the dashboard
+per its backend's procedure in the semantic-compactor skill's
+`references/dashboard-backends.md` — the Jira board query and in-progress issue comments,
+or the file's most recent dated "CURRENT STATE" block. If the dashboard doesn't exist, or
+its freshest state predates the last few commits, say so — that itself is a finding (the
+compactor's pass was skipped or incomplete).
 
 ### 2. Extract and classify the claims
 
-Walk the state block and sort every factual claim into one of four classes, each with its
-own verifier:
+Walk the state (issue statuses and comments, or the file's state block, per the backend)
+and sort every factual claim into one of four classes, each with its own verifier:
 
 | Claim class | Example | Source of truth |
 |---|---|---|
 | **Git claims** | "committed as `96bd364`", "wave-1 fixes are in HEAD" | `git log` / `git show` — confirm the commit exists, is on the expected branch, and touches what the note says it touches |
 | **External-state claims** | "change set X is staged", "the fix is deployed", "the service is running" | The live system: cloud CLI, an HTTP probe, `systemctl` — whatever actually holds that state. If credentials/network make it uncheckable right now, mark it UNVERIFIED, never assume it |
 | **Position claims** | "docket at question 2, awaiting ruling", "awaiting the deploy phrase" | The ledger (`DECISIONS.md` etc.): confirm the prior rulings the position implies are actually recorded, and the next one is not |
-| **Queue claims** | "workstream Y is queued, not started" | Spot-check that the work genuinely isn't done — `git log --grep`, a glance at the named files. A "queued" item that already landed is a stale note about to cause duplicate work |
+| **Queue claims** | "workstream Y (PROJ-12) is queued, not started" | Spot-check that the work genuinely isn't done — `git log --grep`, a glance at the named files. An open item whose work already landed is a stale note about to cause duplicate work |
 
 ### 3. Reconcile and report
 
@@ -42,7 +45,8 @@ Produce a short reconciliation, one line per load-bearing claim:
 quote what it says) / **UNVERIFIED** (couldn't check, and why).
 
 - A CONTRADICTED claim is surfaced to the user **before** anything acts on it, and the
-  dashboard is corrected in the same breath (staleness is the dual of loss).
+  dashboard is corrected in the same breath — close the item, fix the status, or rewrite
+  the state block, per the backend (staleness is the dual of loss).
 - An UNVERIFIED claim may be carried forward only if explicitly labeled as unverified
   wherever it is next used.
 - Don't drown the user: verify everything, but report only contradictions, unverifiables,
