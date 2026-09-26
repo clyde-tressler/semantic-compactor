@@ -18,8 +18,10 @@ Every claim gets verified against its source of truth before anything acts on it
 
 ### 1. Locate the state
 
-Read the repo's dashboard declaration in CLAUDE.md (`Dashboard: jira <KEY>` or
-`Dashboard: file <path>`; undeclared means `file next_steps.md`) and read the dashboard
+Read the repo's dashboard declaration (`Dashboard: jira <KEY>` or
+`Dashboard: file <path>`) — in CLAUDE.md first, else its tracked echo (grep tracked
+files for `Dashboard:`); undeclared anywhere means `file next_steps.md`. Then read the
+dashboard
 per its backend's procedure in the semantic-compactor skill's
 `references/dashboard-backends.md` — the Jira board query and in-progress issue comments,
 or the file's most recent dated "CURRENT STATE" block. If the dashboard doesn't exist, or

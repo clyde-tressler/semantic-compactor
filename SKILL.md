@@ -103,8 +103,10 @@ Dashboard: jira PROJ            # a Jira project, via the Atlassian connector
 
 Backend procedures (the file discipline; the Jira issue mapping, connector tool names,
 and queries) live in `references/dashboard-backends.md` — read it when operating a
-dashboard. If no declaration exists, use the `file` backend and ask once whether another
-should be adopted; record the answer in CLAUDE.md.
+dashboard. The declaration itself obeys the tracked-home rule: if CLAUDE.md is
+gitignored, the same line gets a tracked echo (the README is a good home), or the
+dashboard is orphaned on a fresh clone. If no declaration exists anywhere, use the
+`file` backend and ask once whether another should be adopted; record the answer.
 
 Whatever the backend, two rules hold. **Resolve → Record applies to the dashboard too**:
 a completed item left open is a stale note that will cause a future agent to re-do the

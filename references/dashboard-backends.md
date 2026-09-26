@@ -18,15 +18,20 @@ Every backend implements four operations:
 
 ## Declaring a backend
 
-One line in the repo's CLAUDE.md:
+One line, normally in the repo's CLAUDE.md:
 
 ```
 Dashboard: file next_steps.md   # the default when undeclared
 Dashboard: jira PROJ            # a Jira project key, via the Atlassian connector
 ```
 
-If no declaration exists, use the `file` backend, and ask once whether another backend
-should be adopted; record the answer in CLAUDE.md either way.
+**The declaration itself obeys the tracked-home rule.** CLAUDE.md is often gitignored,
+and a declaration that vanishes on a fresh clone orphans the dashboard — rehydrate would
+silently fall back to a `next_steps.md` that doesn't exist. If the repo's CLAUDE.md is
+untracked, add a tracked echo of the same `Dashboard:` line (the README is a good home);
+when reading, check CLAUDE.md first, then any tracked file. If no declaration exists
+anywhere, use the `file` backend, and ask once whether another backend should be adopted;
+record the answer either way.
 
 ## Invariants (all backends)
 
@@ -56,14 +61,21 @@ Portable: zero dependencies, works on any harness, survives on a fresh clone.
 ## Backend: `jira` (Atlassian connector)
 
 The repo's Jira project, worked through the Atlassian connector
-(`mcp__claude_ai_Atlassian__*` tools). The declaration names the **project key**.
-Requires the connector; if it is unavailable in a session, say so and fall back to
-read-only reasoning — never mirror the board into a file (one dashboard, not two).
+(`mcp__claude_ai_Atlassian__*` tools on claude.ai; a self-hosted Atlassian MCP server
+exposes the same operations under a different prefix — match on the tool names, e.g.
+`searchJiraIssuesUsingJql`). The declaration names the **project key**. Requires the
+connector; if it is unavailable in a session, say so and fall back to read-only
+reasoning — never mirror the board into a file (one dashboard, not two).
 
+- **Discover** — the tools need a `cloudId`: call `getAccessibleAtlassianResources`
+  once per session. If the account spans multiple sites, disambiguate the project key by
+  querying each site (or extend the declaration: `Dashboard: jira PROJ @ site.atlassian.net`).
 - **Read** — `searchJiraIssuesUsingJql` with
   `project = <KEY> AND statusCategory != Done ORDER BY updated DESC`, then the recent
   comments on the in-progress issues. The resume point is the most recently updated
-  in-progress issue and its last state-change comment.
+  in-progress issue and its last state-change comment. A busy board paginates; the
+  `updated DESC` ordering means the first page is the freshest and normally sufficient
+  for a resume point.
 - **Queue** — `createJiraIssue`, one issue per workstream.
 - **Update** — `transitionJiraIssue` for status moves, plus a short
   `addCommentToJiraIssue` comment when state changes hands.
